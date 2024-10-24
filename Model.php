@@ -20,7 +20,7 @@ class Model
     }
     public function getdataTbl($data)
     {
-        $sql = "SELECT PERMESANO AÑO,FORMAT(DATEFROMPARTS(2000, PERMESMES, 1), 'MMM', 'es-ES') MES,D.TOTAL,D.CONPENDIENTES [CON PENDIENTE],D.SINPENDIENTES [SIN PENDIENTE],D.ABIERTO,D.CERRADO,D.ENPROCESO[EN PROCESO],D.VALORSINCERRAR[V SIN CERRAR],FORMAT(D.FECHAACT, 'yyyy-MM-dd') AS [FECHA ACT],
+        $sql = "SELECT PERMESANO AÑO,FORMAT(DATEFROMPARTS(2000, PERMESMES, 1), 'MMM', 'es-ES') MES,D.TOTAL,D.CONPENDIENTES [C PENDIENTE],D.SINPENDIENTES [SN PENDIENTE],D.ABIERTO,D.CERRADO,D.ENPROCESO[EN PROCESO],D.VALORSINCERRAR[V SIN CERRAR],FORMAT(D.FECHAACT, 'yyyy-MM-dd') AS [FECHA ACT],
         '' AS [ACC]
         FROM PERIODO P WITH(NOLOCK) 
         LEFT JOIN (
@@ -67,7 +67,7 @@ class Model
     }
     public function updateData($data)
     {
-        $meses = ['ene.', 'feb.', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        $meses = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
         // Busca el índice del mes
         $mesIndex = array_search($data['mes'], $meses);
         $mesParam = $mesIndex + 1;
@@ -86,12 +86,11 @@ class Model
     }
     public function getDetails($data)
     {
-        $meses = ['ene.', 'feb.', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        $meses = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
         // Busca el índice del mes
         $mesIndex = array_search($data['mes'], $meses);
         $mesParam = $mesIndex + 1;
-        try {
-            $sql = "SELECT T.DOCUMENTO,T.SUCURSAL,T.FACCOMSEC,T.ESTADODOC,T.ESTADOCIERRE,T.FECHAMOV,CAST(T.FECHAORI AS DATE)FECHAORI,T.FECHAACT,T.UNIDADESENT,T.UNIDADESAUT,T.UNIDADESPEN,T.COSTODOCUMENTO,T.COSTOCONTABLE,T.COSTODIFERENCIA,
+        $sql = "SELECT T.DOCUMENTO,T.SUCURSAL,T.FACCOMSEC,T.ESTADODOC,T.ESTADOCIERRE,T.FECHAMOV,CAST(T.FECHAORI AS DATE)FECHAORI,T.FECHAACT,T.UNIDADESENT,T.UNIDADESAUT,T.UNIDADESPEN,T.COSTODOCUMENTO,T.COSTOCONTABLE,T.COSTODIFERENCIA,
             CASE WHEN UNIDADESPEN>0 THEN '1' END CONPENDIENTES,
             (CASE WHEN UNIDADESPEN=0 THEN '1' END)SINPENDIENTES,
             (CASE WHEN ESTADOCIERRE='N' THEN '1' END)ABIERTO,
@@ -99,26 +98,23 @@ class Model
             (CASE WHEN ESTADODOC='ACTIVA' THEN '1' END)ACTIVAS,
             (CASE WHEN ESTADODOC<>'ACTIVA' THEN '1' END)ENPROCESO
             FROM TBCIERRECAPITA T WITH(NOLOCK)
-            WHERE YEAR(FECHAORI)= :anio AND MONTH(FECHAORI)= :mes
-            ";
-            $stmt = $this->cnx->prepare($sql);
-            $stmt->bindParam(':anio', $data['anio'], PDO::PARAM_STR);
-            $stmt->bindParam(':mes', $mesParam, PDO::PARAM_STR);
-            $stmt->execute();
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            return $result;
-        } catch (PDOException $e) {
-            throw new Exception("Error en: " . $e->getMessage());
+            WHERE YEAR(FECHAORI)= " . $data['anio'] . " AND MONTH(FECHAORI)= " . $mesParam;
+        $stmt = $this->cnx->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (count($result) > 0) {
+            return $sql;
         }
+        return false;
     }
     public function getDetailstbl($data)
     {
-        $meses = ['ene.', 'feb.', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        $meses = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
         // Busca el índice del mes
         $mesIndex = array_search($data['mes'], $meses);
         $mesParam = $mesIndex + 1;
-        try {
-            $sql = "SELECT T.DOCUMENTO,T.SUCURSAL,T.FACCOMSEC,T.ESTADODOC,T.ESTADOCIERRE,T.FECHAMOV,CAST(T.FECHAORI AS DATE)FECHAORI,T.FECHAACT,T.UNIDADESENT,T.UNIDADESAUT,T.UNIDADESPEN,T.COSTODOCUMENTO,T.COSTOCONTABLE,T.COSTODIFERENCIA,
+        $sql =
+            "SELECT T.DOCUMENTO,T.SUCURSAL,T.FACCOMSEC,T.ESTADODOC,T.ESTADOCIERRE,T.FECHAMOV,CAST(T.FECHAORI AS DATE)FECHAORI,T.FECHAACT,T.UNIDADESENT,T.UNIDADESAUT,T.UNIDADESPEN,T.COSTODOCUMENTO,T.COSTOCONTABLE,T.COSTODIFERENCIA,
             CASE WHEN UNIDADESPEN>0 THEN '1' END CONPENDIENTES,
             (CASE WHEN UNIDADESPEN=0 THEN '1' END)SINPENDIENTES,
             (CASE WHEN ESTADOCIERRE='N' THEN '1' END)ABIERTO,
@@ -126,16 +122,13 @@ class Model
             (CASE WHEN ESTADODOC='ACTIVA' THEN '1' END)ACTIVAS,
             (CASE WHEN ESTADODOC<>'ACTIVA' THEN '1' END)ENPROCESO
             FROM TBCIERRECAPITA T WITH(NOLOCK)
-            WHERE YEAR(FECHAMOV) = :anio AND MONTH(FECHAMOV) = :mes
-            ";
-            $stmt = $this->cnx->prepare($sql);
-            $stmt->bindParam(':anio', $data['anio'], PDO::PARAM_STR);
-            $stmt->bindParam(':mes', $mesParam, PDO::PARAM_STR);
-            $stmt->execute();
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            return $result;
-        } catch (PDOException $e) {
-            throw new Exception("Error en: " . $e->getMessage());
+            WHERE YEAR(FECHAMOV) = " . $data['anio'] . " AND MONTH(FECHAMOV) = " . $mesParam;
+        $stmt = $this->cnx->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (count($result) > 0) {
+            return $sql;
         }
+        return false;
     }
 }

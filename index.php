@@ -1,6 +1,6 @@
 <?php
 
-require_once 'Controllers/Controller.php';
+require_once 'Controller.php';
 $controller = new Controller();
 
 ?>
@@ -132,7 +132,7 @@ $controller = new Controller();
             </div>
         </div>
         <!-- Modal Details -->
-        <div class="modal fade" id="modalDetails" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="modalDetails" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">

@@ -1,12 +1,15 @@
 <?php
-require_once __DIR__ . '/../Models/Model.php';
+require_once __DIR__ . '/Model.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/tools/sqltoexcel/index.php';
 class Controller
 {
     private $model;
+    private $xlsx;
 
     public function __construct()
     {
         $this->model = new Model();
+        $this->xlsx = new Xlsx();
     }
     public function getYears()
     {
@@ -35,16 +38,56 @@ class Controller
             echo json_encode(['success' => true, 'data' => $result]);
         }
     }
+    /**
+     * Maneja la solicitud para obtener detalles y generar un archivo Excel.
+     *
+     * Este método invoca la generación de un archivo Excel que contiene
+     * los detalles obtenidos mediante el método 'getDetails' del modelo.
+     */
     public function getDetails()
     {
-        $result = $this->model->getDetails($_POST);
-        $this->renderTable($result, 'tbl3', false);
+        $this->exportDataToExcel('getDetails');
     }
+
+    /**
+     * Maneja la solicitud para obtener detalles de una tabla y generar un archivo Excel.
+     *
+     * Este método invoca la generación de un archivo Excel que contiene
+     * los detalles obtenidos mediante el método 'getDetailstbl' del modelo.
+     */
     public function getDetailstbl()
     {
-        $result = $this->model->getDetailstbl($_POST);
-        $this->renderTable($result, 'tbl3', false);
+        $this->exportDataToExcel('getDetailstbl');
     }
+
+    /**
+     * Genera un archivo Excel basado en el método especificado del modelo.
+     *
+     * Este método configura el entorno de ejecución y llama al método del modelo
+     * correspondiente para obtener los datos necesarios. Si se encuentran resultados,
+     * se genera un archivo Excel y se proporciona una URL para su descarga.
+     *
+     * @param string $method Nombre del método del modelo que se va a invocar.
+     * @return void
+     */
+    public function exportDataToExcel($method)
+    {
+        // Configuración del tiempo máximo de ejecución y límite de memoria
+        set_time_limit(300);
+        ini_set('memory_limit', '512M');
+        ignore_user_abort(true);
+
+        // Invocación del método del modelo para obtener los datos
+        $result = $this->model->$method($_POST);
+        if ($result) {
+            $filePath = 'proyectos/cierrecontcap/informe.xlsx';
+            $this->xlsx->CrearXlsx('sql', $result); // Generación del archivo Excel
+            echo json_encode(['success' => true, 'fileUrl' => $filePath, 'message' => 'Descarga del archivo Excel exitosa.']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'No se encontraron resultados.']);
+        }
+    }
+
 
     /**
      * Renderiza una tabla HTML a partir de los datos proporcionados.
@@ -66,7 +109,7 @@ class Controller
     private function renderTable($data, $tableId, $footer = false)
     {
         // Incluye la vista de la tabla ubicada en la carpeta 'Views'
-        include __DIR__ . '/../Views/table.php';
+        include __DIR__ . '/Views/table.php';
     }
 }
 
